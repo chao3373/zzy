@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+    <style>
+        table td {
+            padding: 5px;
+            font-size: 30px;
+            font-family: "微软雅黑";
+        }
+
+        h1 {
+            display: block;
+            text-align: center;
+            width: 100%;
+            letter-spacing: 40px;
+            font-size: 50px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0;">
+<div style="width: 100%; background-color:purple; text-align: center; padding: 20px;">
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:auto; padding-bottom: 20px;">
+        <form action="/insertCard">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>办理电子健康卡</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>姓名</td>
+                    <td><input id="name" name="name"/></td>
+                </tr>
+                <tr>
+                    <td>性别</td>
+                    <td><input id="sex" name="sex"/></td>
+                </tr>
+                <tr>
+                    <td>生日</td>
+                    <td><input id="birthday" name="birthday"/></td>
+                </tr>
+                <tr>
+                    <td>住址</td>
+                    <td><input id="address" name="address"/></td>
+                </tr>
+                <tr>
+                    <td>身份证号（选填）</td>
+                    <td><input id="idcard" name="idcard"/></td>
+                </tr>
+                <tr>
+                    <td>手机号</td>
+                    <td><input id="phone" name="phone"/></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="提交"/></td>
+                    <td><input type="reset" value="重置"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
