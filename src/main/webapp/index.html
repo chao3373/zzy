@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <title>测试页面</title>
     <style>
         table td {
@@ -14,7 +18,7 @@
             display: block;
             text-align: center;
             width: 100%;
-            letter-spacing: 40px;
+            letter-spacing: 25px;
             font-size: 50px;
             margin: 0;
         }
@@ -23,7 +27,7 @@
 <body style="margin: 0; padding: 0;">
 <div style="width: 100%; background-color:purple; text-align: center; padding: 20px;">
     <div style="width: 80%; background-color:skyblue; text-align: center; margin:auto; padding-bottom: 20px;">
-        <form action="/insertCard">
+        <form id="fm" action="">
             <table style="margin: auto;">
                 <tr>
                     <td colspan="2"><h1>办理电子健康卡</h1></td>
@@ -57,12 +61,170 @@
                     <td><input id="phone" name="phone"/></td>
                 </tr>
                 <tr>
-                    <td><input type="submit" value="提交"/></td>
-                    <td><input type="reset" value="重置"/></td>
+                    <td colspan="2">
+                        <a id="submit" href="javascript:tijiao()" name="submit">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm2" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>根据就诊卡号查询用户信息</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber2" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit2">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm3" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>推送电子就诊卡信息</h1></td>
+                </tr>
+                <tr>
+                    <td>姓名</td>
+                    <td><input id="name2" name="name"/></td>
+                </tr>
+                <tr>
+                    <td>原就诊卡号</td>
+                    <td><input id="oldMedicalCardNumber" name="oldMedicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>新就诊卡号</td>
+                    <td><input id="newMedicalCardNumber" name="newMedicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit3">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm4" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>待缴费信息查询接口</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber4" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit4">提交</a>
+                    </td>
                 </tr>
             </table>
         </form>
     </div>
 </div>
+<script>
+    $(function() {
+
+        //办理电子健康卡
+        $('#submit').click(function() {
+            var d = {};
+            var t = $('#fm').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/insertCard",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    alert(result.msg);
+                }
+            });
+        });
+
+        //根据就诊卡号查询用户信息
+        $('#submit2').click(function() {
+            var d = {};
+            var t = $('#fm2').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/selectByMedicalCardNumber ",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //推送电子就诊卡信息
+        $('#submit3').click(function() {
+            var d = {};
+            var t = $('#fm3').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/updateMedicalCardNumber ",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //待缴费信息查询接口
+        $('#submit4').click(function() {
+            var d = {};
+            var t = $('#fm4').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/selectPaymentInformation",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+
+    });
+</script>
 </body>
 </html>

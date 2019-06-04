@@ -17,7 +17,7 @@ public class DaoUtil {
     static final String Name = "sa";
     static final String Pwd = "root";
 
-    public static Connection getPreparedStatement() {
+    public static Connection getConnection() {
         try {
             return DriverManager.getConnection(dbURL, Name, Pwd);
         } catch (SQLException e) {
@@ -27,60 +27,80 @@ public class DaoUtil {
     }
 
     /***
-     * 调用sql语句
-     * @param conn
-     * @param sql
+     * 获取查询的结果集
+     * @param resultSet
      * @return
      */
-    public static PreparedStatement getPreparedStatement(Connection conn, String sql) {
-        try {
-            return conn.prepareStatement(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public static List<Map<String, Object>> getresultSet(ResultSet resultSet) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        while (true) {
+            try {
+                if (resultSet.next()){
+                    Map<String, Object> map1 = new HashMap<>();
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                        map1.put(metaData.getColumnName(i), resultSet.getString(i));
+                    }
+                    list.add(map1);
+                    System.out.println(list);
+                }
+                return list;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return list;
+            }
         }
-        return null;
     }
 
-    /***
-     * 调用存储过程
-     * @param conn
-     * @param sql
-     * @return
-     */
-    public static CallableStatement getCallableStatement(Connection conn, String sql) {
-        try {
-            return conn.prepareCall(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    public static PreparedStatement getPreparedStatement(Connection conn, String sql) {
+//        try {
+//            return conn.prepareStatement(sql);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    /***
+//     * 调用存储过程
+//     * @param conn
+//     * @param sql
+//     * @return
+//     */
+//    public static CallableStatement getCallableStatement(Connection conn, String sql) {
+//        try {
+//            return conn.prepareCall(sql);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
 
-        PreparedStatement ps = null;
-        Connection conn = null;
-        ResultSet rs = null;
-
-        try {
-            Class.forName(driverName);
-            conn = DriverManager.getConnection(dbURL, Name, Pwd);
-            System.out.println("连接成功");
-            CallableStatement callableStatement = conn.prepareCall("{? = call WeiXin_InsertCard(?, ?, ?, ?, ?, ?, ?)}");
-            callableStatement.registerOutParameter(1, Types.NUMERIC);
-            callableStatement.setObject(2, "bl1009909900211");
-            callableStatement.setObject(3, "158");
-            callableStatement.setObject(4, "156158");
-            callableStatement.setObject(5, "2019-03-01");
-            callableStatement.setObject(6, "地址");
-            callableStatement.setObject(7, "159158");
-            callableStatement.setObject(8, "159158");
+//        PreparedStatement ps = null;
+//        Connection conn = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            Class.forName(driverName);
+//            conn = DriverManager.getConnection(dbURL, Name, Pwd);
+//            System.out.println("连接成功");
+//            CallableStatement callableStatement = conn.prepareCall("{? = call WeiXin_InsertCard(?, ?, ?, ?, ?, ?, ?)}");
+//            callableStatement.registerOutParameter(1, Types.NUMERIC);
+//            callableStatement.setObject(2, "bl1009909900211");
+//            callableStatement.setObject(3, "158");
+//            callableStatement.setObject(4, "156158");
+//            callableStatement.setObject(5, "2019-03-01");
+//            callableStatement.setObject(6, "地址");
+//            callableStatement.setObject(7, "159158");
+//            callableStatement.setObject(8, "159158");
 
 
 //            callableStatement.registerOutParameter();
-            callableStatement.execute();
-            System.out.println(callableStatement.getInt(1));
+//            callableStatement.execute();
+//            System.out.println(callableStatement.getInt(1));
 
 //            ps = conn.prepareStatement("select * from Sys_Config");
 //            rs = ps.executeQuery();
@@ -93,9 +113,9 @@ public class DaoUtil {
 //                }
 //                list.add(map);
 //            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("连接失败");
-        }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.out.println("连接失败");
+//        }
+//    }
     }
-}

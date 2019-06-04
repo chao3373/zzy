@@ -21,17 +21,54 @@ public class IndexController {
     @Resource
     private IndexService indexService;
 
+    /***
+     *办理电子健康卡
+     * @param medicalCardNumber
+     * @param name
+     * @param sex
+     * @param birthday
+     * @param address
+     * @param idcard
+     * @param phone
+     * @return
+     */
     @RequestMapping("/insertCard")
     public Map<String, Object> insertCard(String medicalCardNumber, String name, String sex, String birthday, String address, String idcard, String phone) {
-        Map<String, Object> map = new HashMap<>();
-        indexService.insertCard(medicalCardNumber, name, sex, birthday, address, idcard, phone);
-        System.out.println(medicalCardNumber + "==========" + name + "==========" + sex + "==========" + birthday + "==========" + address + "==========" + idcard + "==========" + phone);
-
-
-
-        map.put("success", true);
-        map.put("msg", "成功");
-        map.put("code", "10001");
-        return map;
+        Map<String, Object> map = indexService.insertCard(medicalCardNumber, name, sex, birthday, address, idcard, phone);
+        System.out.println(map);
+        if (map != null) {
+            return map;
+        }
+        return null;
     }
+
+    /***
+     *根据就诊卡号查询用户信息
+     * @param medicalCardNumber
+     * @return
+     */
+    @RequestMapping("/selectByMedicalCardNumber")
+    public Map<String, Object> selectByMedicalCardNumber(String medicalCardNumber) {
+        return indexService.selectByMedicalCardNumber(medicalCardNumber);
+    }
+
+    /***
+     *推送电子就诊卡信息
+     * @return
+     */
+    @RequestMapping("/updateMedicalCardNumber")
+    public Map<String, Object> updateMedicalCardNumber(String name, String oldMedicalCardNumber, String newMedicalCardNumber) {
+        return indexService.updateMedicalCardNumber(name, oldMedicalCardNumber, newMedicalCardNumber);
+    }
+
+    /***
+     * 待缴费信息查询接口
+     * @param medicalCardNumber
+     * @return
+     */
+    @RequestMapping("/selectPaymentInformation")
+    public Map<String, Object> selectPaymentInformation(String medicalCardNumber) {
+        return indexService.selectPaymentInformation(medicalCardNumber);
+    }
+
 }

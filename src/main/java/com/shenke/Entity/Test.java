@@ -7,4 +7,5 @@ package com.shenke.Entity;
  */
 
 public class Test {
+
 }
