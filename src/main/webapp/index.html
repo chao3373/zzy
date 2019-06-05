@@ -133,6 +133,109 @@
             </table>
         </form>
     </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm5" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>获取就诊卡余额</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber5" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit5">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm6" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>查询住院信息</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber6" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>住院号</td>
+                    <td><input id="admissionNumber" name="admissionNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit6">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm7" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1>获取住院押金欠费用户信息</h1></td>
+                </tr>
+                <tr>
+                    <td>金额</td>
+                    <td><input id="prePay" name="prePay" type="number"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit7">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm9" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1 style="font-size: 30px;">查询一日住院费用明细</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber7" name="prePay" type="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>指定查询的日期</td>
+                    <td><input id="date" name="prePay" type="date"/></td>
+                </tr>
+                <tr>
+                    <td>住院号</td>
+                    <td><input id="admissionNumber1" name="prePay" type="admissionNumber"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit9">查询</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm8" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1 style="font-size: 30px;">查询一日住院费用明细</h1></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit8">查询</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
 </div>
 <script>
     $(function() {
@@ -223,6 +326,91 @@
             });
         });
 
+        //获取就诊卡余额
+        $('#submit5').click(function() {
+            var d = {};
+            var t = $('#fm5').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/selectBalance",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //查询住院信息
+        $('#submit6').click(function() {
+            var d = {};
+            var t = $('#fm6').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/selectMessage",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //获取住院押金欠费用户信息
+        $('#submit7').click(function() {
+            var d = {};
+            var t = $('#fm7').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            $.ajax({
+                url:"/selectArrearageUserMessage",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //查询所有住院状态的电子健康卡用户信息
+        $('#submit8').click(function() {
+            $.ajax({
+                url:"/selectAllInHospital",
+                type:"POST",
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
 
     });
 </script>

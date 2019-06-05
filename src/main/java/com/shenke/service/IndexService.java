@@ -17,4 +17,12 @@ public interface IndexService {
 
     Map<String, Object> selectPaymentInformation(String medicalCardNumber);
 
+    Map<String, Object> selectBalance(String medicalCardNumber);
+
+    Map<String, Object> selectMessage(String medicalCardNumber, String admissionNumber);
+
+    Map<String, Object> selectArrearageUserMessage(Double prePay);
+
+    Map<String, Object> selectAllInHospital();
+
 }

@@ -33,22 +33,21 @@ public class DaoUtil {
      */
     public static List<Map<String, Object>> getresultSet(ResultSet resultSet) {
         List<Map<String, Object>> list = new ArrayList<>();
-        while (true) {
-            try {
-                if (resultSet.next()){
-                    Map<String, Object> map1 = new HashMap<>();
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                        map1.put(metaData.getColumnName(i), resultSet.getString(i));
-                    }
-                    list.add(map1);
-                    System.out.println(list);
+        try {
+            while (resultSet.next()) {
+                Map<String, Object> map1 = new HashMap<>();
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                    map1.put(metaData.getColumnName(i), resultSet.getString(i));
                 }
-                return list;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return list;
+                System.out.println(map1);
+                list.add(map1);
+                System.out.println(list);
             }
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
         }
     }
 
@@ -118,4 +117,4 @@ public class DaoUtil {
 //            System.out.println("连接失败");
 //        }
 //    }
-    }
+}

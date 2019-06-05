@@ -71,4 +71,45 @@ public class IndexController {
         return indexService.selectPaymentInformation(medicalCardNumber);
     }
 
+    /***
+     * 查询就诊卡余额
+     * @param medicalCardNumber
+     * @return
+     */
+    @RequestMapping("/selectBalance")
+    public Map<String, Object> selectBalance(String medicalCardNumber) {
+        System.out.println(medicalCardNumber);
+        return indexService.selectBalance(medicalCardNumber);
+    }
+
+    /***
+     * 查询住院信息
+     * @param medicalCardNumber
+     * @param admissionNumber
+     * @return
+     */
+    @RequestMapping("/selectMessage")
+    public Map<String, Object> selectMessage(String medicalCardNumber, String admissionNumber) {
+        return indexService.selectMessage(medicalCardNumber, admissionNumber);
+    }
+
+    /***
+     * 获取住院押金欠费用户信息
+     * @param prePay
+     * @return
+     */
+    @RequestMapping("/selectArrearageUserMessage")
+    public Map<String, Object> selectArrearageUserMessage(Double prePay) {
+        return indexService.selectArrearageUserMessage(prePay);
+    }
+
+    /***
+     * 查询所有住院状态的电子健康卡用户信息
+     * @return
+     */
+    @RequestMapping("/selectAllInHospital")
+    public Map<String, Object> selectAllInHospital() {
+        return indexService.selectAllInHospital();
+    }
+
 }

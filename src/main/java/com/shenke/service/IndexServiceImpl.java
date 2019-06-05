@@ -226,12 +226,13 @@ public class IndexServiceImpl implements IndexService {
                     "where a.JieSuanBZ=0 and a.JiuZhenID=b.JiuZhenID \n" +
                     "and a.ChuFangLH=b.ChuFangLH\n" +
                     "and a.YiShengBM=c.RenYuanBM\n" +
+                    "and CONVERT(varchar(10),a.ChuFangRQ,120)=CONVERT(varchar(10),GETDATE(),120)\n" +
                     "and a.JiuzhenKH=?");
             preparedStatement.setString(1, medicalCardNumber);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
-            if(list.size() == 0) {
+            if (list.size() == 0) {
                 map.put("success", false);
                 map.put("msg", "查询成功没有待缴费信息");
                 map.put("code", "10002");
@@ -249,6 +250,7 @@ public class IndexServiceImpl implements IndexService {
                         "where a.JieSuanBZ=0 and a.JiuZhenID=b.JiuZhenID \n" +
                         "and a.ChuFangLH=b.ChuFangLH\n" +
                         "and a.YiShengBM=c.RenYuanBM\n" +
+                        "and CONVERT(varchar(10),a.ChuFangRQ,120)=CONVERT(varchar(10),GETDATE(),120)\n " +
                         "and a.JiuzhenKH = ?");
 
                 preparedStatement1.setString(1, medicalCardNumber);
@@ -260,10 +262,10 @@ public class IndexServiceImpl implements IndexService {
                     map.put("msg", "查询成功没有待缴费信息");
                     map.put("code", "10002");
                     return map;
-                }else {
+                } else {
                     Map<String, Object> map1 = new HashMap<>();
                     map1.put("amount", list.get(0).get("JinE"));
-                    map1.put("detail", list1.get(0));
+                    map1.put("detail", list1);
                     map.put("success", true);
                     map.put("msg", "查询成功没有待缴费信息");
                     map.put("code", "10002");
@@ -286,4 +288,239 @@ public class IndexServiceImpl implements IndexService {
             }
         }
     }
+
+    /***
+     * 查询就诊卡余额
+     * @param medicalCardNumber
+     * @return
+     */
+    @Override
+    public Map<String, Object> selectBalance(String medicalCardNumber) {
+        Map<String, Object> map = new HashMap<>();
+        Connection connection = DaoUtil.getConnection();
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("select LeftJinE as balance From Card_MasterInfo where CardNo= ?");
+            preparedStatement.setString(1, medicalCardNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+            if (list.size() == 0) {
+                map.put("success", false);
+                map.put("msg", "没有查询到记录");
+                map.put("code", "10003");
+                return map;
+            } else {
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("data", list.get(0).get("balance"));
+                return map;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /***
+     * 查询住院信息
+     * @param medicalCardNumber
+     * @param admissionNumber
+     * @return
+     */
+    @Override
+    public Map<String, Object> selectMessage(String medicalCardNumber, String admissionNumber) {
+        Map<String, Object> map = new HashMap<>();
+        Connection connection = DaoUtil.getConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            if (admissionNumber == null) {
+
+                preparedStatement = connection.prepareStatement("select \n" +
+                        "b.medicalCardNumber as medicalCardNumber,\n" +
+                        "a.ZhuYuanID as  admissionNumber,\n" +
+                        "a.XingMing as  inPatName,\n" +
+                        "d.KeShiMC as  deptName,\n" +
+                        "a.ChuangHao as  bedNumber,\n" +
+                        "a.JiZhangKuan as  totalCost,\n" +
+                        "a.YuFuKuan as  totalPrepay,\n" +
+                        "a.JieYuKuan  prepayLeft,\n" +
+                        "0 as minimumPayment,\n" +
+                        "100000 as maximumPayment,\n" +
+                        "a.XingBie  sex,\n" +
+                        "a.RuYuanSJ as  patInTime,\n" +
+                        "c.ShenFenZH as idCard,\n" +
+                        "b.LianXiDH as phone\n" +
+                        "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
+                        "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
+                        "and b.medicalCardNumber=?");
+
+                preparedStatement.setString(1,medicalCardNumber);
+                resultSet = preparedStatement.executeQuery();
+
+            } else {
+                preparedStatement = connection.prepareStatement("select \n" +
+                        "b.medicalCardNumber as medicalCardNumber,\n" +
+                        "a.ZhuYuanID as  admissionNumber,\n" +
+                        "a.XingMing as  inPatName,\n" +
+                        "d.KeShiMC as  deptName,\n" +
+                        "a.ChuangHao as  bedNumber,\n" +
+                        "a.JiZhangKuan as  totalCost,\n" +
+                        "a.YuFuKuan as  totalPrepay,\n" +
+                        "a.JieYuKuan  prepayLeft,\n" +
+                        "0 as minimumPayment,\n" +
+                        "100000 as maximumPayment,\n" +
+                        "a.XingBie  sex,\n" +
+                        "a.RuYuanSJ as  patInTime,\n" +
+                        "c.ShenFenZH as idCard,\n" +
+                        "b.LianXiDH as phone\n" +
+                        "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
+                        "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
+                        "and a.ZhuYuanID=?");
+
+                preparedStatement.setString(1, admissionNumber);
+                resultSet = preparedStatement.executeQuery();
+            }
+
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+            if (list.size() == 0) {
+                map.put("success", false);
+                map.put("msg", "没有查询到住院信息");
+                map.put("code", "10002");
+                return map;
+            } else {
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("data", list.get(0));
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /***
+     * 获取住院押金欠费用户信息
+     * @param prePay
+     * @return
+     */
+    @Override
+    public Map<String, Object> selectArrearageUserMessage(Double prePay) {
+        Map<String, Object> map = new HashMap<>();
+        Connection connection = DaoUtil.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("select \n" +
+                    "b.medicalCardNumber as medicalCardNumber,\n" +
+                    "a.ZhuYuanHao as admissionNumber,\n" +
+                    "a.XingMing as  userName,\n" +
+                    "d.KeShiMC as  deptName,\n" +
+                    "a.ChuangHao as  bedNumber,\n" +
+                    "a.JieYuKuan as  balance,\n" +
+                    "a.RuYuanSJ as  patInTime\n" +
+                    "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
+                    "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
+                    "and a.JieSuanSJ is null and JieYuKuan < ?");
+
+            preparedStatement.setDouble(1, prePay);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+
+            if (list.size() == 0) {
+                map.put("success",false);
+                map.put("msg", "没有查询到符合条件的记录");
+                map.put("code", "10002");
+                return map;
+            } else {
+                map.put("success",true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+//                System.out.println(list.get(0));
+                map.put("data", list);
+                return map;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            map.put("success",false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+
+    /***
+     * 查询所有住院状态的电子健康卡用户信息
+     * @return
+     */
+    @Override
+    public Map<String, Object> selectAllInHospital() {
+        Map<String, Object> map = new HashMap<>();
+        Connection connection = DaoUtil.getConnection();
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("select \n" +
+                    "b.medicalCardNumber as medicalCardNumber,\n" +
+                    "a.ZhuYuanHao as admissionNumber,\n" +
+                    "a.XingMing as  userName,\n" +
+                    "d.KeShiMC as  deptName,\n" +
+                    "a.ChuangHao as  bedNumber\n" +
+                    "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
+                    "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
+                    "and a.JieSuanSJ is null and b.medicalCardNumber is not null");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+            if (list.size() == 0) {
+                map.put("success", false);
+                map.put("msg", "没有记录");
+                map.put("code", "10002");
+                return map;
+            } else {
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("data", list);
+                return map;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "发生未知错误");
+            map.put("code", "10003");
+            return map;
+        }
+    }
+
 }
