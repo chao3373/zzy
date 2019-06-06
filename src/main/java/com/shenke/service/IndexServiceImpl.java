@@ -1,10 +1,11 @@
 package com.shenke.service;
 
+import cn.hutool.json.JSONObject;
 import com.shenke.util.DaoUtil;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -518,6 +519,245 @@ public class IndexServiceImpl implements IndexService {
             e.printStackTrace();
             map.put("success", false);
             map.put("msg", "发生未知错误");
+            map.put("code", "10003");
+            return map;
+        }
+    }
+
+    /***
+     *查询一日住院费用明细
+     * @param medicalCardNumber
+     * @param date
+     * @param admissionNumber
+     * @return
+     */
+    @Override
+    public Map<String, Object> selectOneDay(String medicalCardNumber, String date, String admissionNumber) {
+
+        Connection connection = DaoUtil.getConnection();
+        Map<String, Object> map = new HashMap<>();
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("select \n" +
+                    "a.JiuZhenKH,\n" +
+                    "b.jiesuanrq,\n" +
+                    "a.XingMing as  name,\t-- 患者姓名,\n" +
+                    "a.XingBie as sex,\t-- 患者性别，男，女,\n" +
+                    "c.XingMing as doctor,\t-- 医生姓名,\n" +
+                    "a.JiZhangKuan as  total,\t-- 总费用,\n" +
+                    "a.ZhuYuanHao as admissionNumber,\t-- 住院号,\n" +
+                    "a.RuYuanZD as diagnosis,\t-- 诊断,\n" +
+                    "CONVERT(varchar(19),b.jiesuanrq,121) as time,\t-- 时间yyyy-MM-dd HH,\t--mm,\t--ss,\n" +
+                    "b.YaoMing as  item,\t-- 项目名称,\n" +
+                    "d.HeSuanMC as type,\t-- 费用类型,\n" +
+                    "b.DanJia as  price,\t-- 单价,\n" +
+                    "b.ShuLiang as quantity,\t-- 数量,\n" +
+                    "b.JinE  as  amount\t-- 金额（小计）\n" +
+                    "From LD_Register a,LD_ChargeDetail b,Dict_Personnel  c,Dict_CheckItem d\n" +
+                    "where a.ZhuYuanID=b.ZhuYuanID and b.JieSuanPC=a.JieZhangPC and b.HeSuanBM=d.HeSuanBM \n" +
+                    "and a.YiShengBM =c.RenYuanBM \n" +
+                    "and a.JieSuanSJ is null\n" +
+                    "AND a.ZhuYuanHao = ?\n" +
+                    "AND a.JiuZhenKH = ?\n" +
+                    "AND b.jiesuanrq > ? \n" +
+                    "AND b.jiesuanrq < ?");
+            preparedStatement.setString(1, admissionNumber);
+            preparedStatement.setString(2, medicalCardNumber);
+            System.out.println(date);
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd").parse(date));
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd").parse(date + " 23:59:59"));
+            preparedStatement.setString(3, date + " 00:00:00");
+            preparedStatement.setString(4, date + " 23:59:59");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+            Map<String, Object> map1 = new HashMap<>();
+            map1.put("name", list.get(0).get("name"));
+            map1.put("sex", list.get(0).get("sex"));
+            map1.put("doctor", list.get(0).get("doctor"));
+            map1.put("total", list.get(0).get("total"));
+            map1.put("admissionNumber", list.get(0).get("admissionNumber"));
+            map1.put("diagnosis", list.get(0).get("diagnosis"));
+
+            for (int i = 0; i < list.size(); i++) {
+                list.get(i).remove("name");
+                list.get(i).remove("sex");
+                list.get(i).remove("doctor");
+                list.get(i).remove("total");
+                list.get(i).remove("admissionNumber");
+                list.get(i).remove("diagnosis");
+            }
+
+            map1.put("details", list);
+
+            if (list.size() == 0) {
+                map.put("success", false);
+                map.put("msg", "没有记录");
+                map.put("code", "10002");
+                return map;
+            } else {
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("data", map1);
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /***
+     * 用户支付成功后，公众号系统调用此接口将支付成功信息通知院内系统
+     * @param medicalCardNumber
+     * @param outTradeNo
+     * @param amount
+     * @param payTime
+     * @param payType
+     * @param detailId
+     * @return
+     */
+    @Override
+    public Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId) {
+        Map<String, Object> map = new HashMap<>();
+
+        Connection connection = DaoUtil.getConnection();
+        String msg = "";
+        try {
+            CallableStatement callableStatement = connection.prepareCall("{? = call WeiXin_CreateRecipeDetail(?,?)}");
+            callableStatement.registerOutParameter(1, Types.NUMERIC);
+            callableStatement.setString(2, medicalCardNumber);
+            callableStatement.registerOutParameter(3, Types.VARCHAR);
+            callableStatement.execute();
+            System.out.println(callableStatement.getInt(1));
+            System.out.println(callableStatement.getString(3));
+
+            switch (callableStatement.getInt(1)) {
+                case 1:
+                    msg = "插入临时费用表出错";
+                    break;
+                case 2:
+                    msg = "插入药品明细错误";
+                    break;
+                case 3:
+                    msg = "获取卡信息出错";
+                    break;
+                case 4:
+                    msg = "缺药@DrugInfo 缺药信息";
+                    break;
+                case 5:
+                    msg = "更新处方金额出错";
+                    break;
+            }
+
+            if (callableStatement.getInt(1) != 0) {
+                map.put("success", false);
+                map.put("msg", msg);
+                map.put("code", "10002");
+            } else {
+
+                CallableStatement callableStatement1 = connection.prepareCall("{? = call WeiXin_RecipeSettl(?,?,?)}");
+                callableStatement1.registerOutParameter(1, Types.NUMERIC);
+                callableStatement1.setString(2, medicalCardNumber);
+                callableStatement1.setString(3,amount);
+                callableStatement1.registerOutParameter(4, Types.VARCHAR);
+                callableStatement1.execute();
+                System.out.println(callableStatement1.getInt(1));
+                System.out.println(callableStatement1.getString(4));
+
+                switch (callableStatement1.getInt(1)) {
+                    case 1:
+                        msg = "未查询到该卡姓名信息";
+                        break;
+                    case 2:
+                        msg = "处方金额跟支付金额不符";
+                        break;
+                    case 3:
+                        msg = "更新处方标志出错";
+                        break;
+                    case 4:
+                        msg = "生成单据号错误";
+                        break;
+                    case 5:
+                        msg = "更新处方明细表错误";
+                        break;
+                    case 6:
+                        msg = "生成发票明细表错误";
+                        break;
+                    case 7:
+                        msg = "生成发票主表错误";
+                        break;
+                    case 8:
+                        msg = "生成发药表信息错误";
+                        break;
+                    case 9:
+                        msg = "生成发药状态明细表错误";
+                        break;
+                    case 10:
+                        msg = "更新总量库存信息错误";
+                        break;
+                    case 11:
+                        msg = "更新批次库存信息错误";
+                        break;
+                    case 12:
+                        msg = "生成处方明细表错误";
+                        break;
+                    case 13:
+                        msg = "更新处方金额错误";
+                        break;
+                    case 14:
+                        msg = "插入支付信息错误";
+                        break;
+                    case 15:
+                        msg = "删除临时数据错误";
+                        break;
+                    case 16:
+                        msg = "删除master表错误";
+                        break;
+                    case 17:
+                        msg = "发票主表跟发票细表不符";
+                        break;
+                }
+
+                if (callableStatement1.getInt(1) != 0) {
+                    map.put("success", false);
+                    map.put("msg", msg);
+                    map.put("code", "10002");
+                } else {
+                    Map<String, Object> map1 = new HashMap<>();
+                    map1.put("outPrepayId", callableStatement1.getString(4));
+                    Map<String, Object> map2 = this.selectPaymentInformation(medicalCardNumber);
+                    Map<String, Object> map3 = (Map<String, Object>) map2.get("data");
+                    String string = (String) map3.get("amount");
+                    double amount1 = Double.parseDouble(string);
+                    map1.put("amount", amount1 - Double.parseDouble(amount));
+                    map.put("success", true);
+                    map.put("msg", "成功");
+                    map.put("code", "10001");
+                    map.put("data", map1);
+                }
+            }
+
+            connection.close();
+            callableStatement.close();
+            return map;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            msg = "未知错误";
+            map.put("success", false);
+            map.put("msg", msg);
             map.put("code", "10003");
             return map;
         }

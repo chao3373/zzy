@@ -196,6 +196,21 @@
     </div>
 
     <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm8" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1 style="font-size: 30px;">查询所有住院状态的电子健康卡用户信息</h1></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit8">查询</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
         <form id="fm9" action="">
             <table style="margin: auto;">
                 <tr>
@@ -203,15 +218,15 @@
                 </tr>
                 <tr>
                     <td>就诊卡号</td>
-                    <td><input id="medicalCardNumber7" name="prePay" type="medicalCardNumber"/></td>
+                    <td><input id="medicalCardNumber7" name="medicalCardNumber"/></td>
                 </tr>
                 <tr>
                     <td>指定查询的日期</td>
-                    <td><input id="date" name="prePay" type="date"/></td>
+                    <td><input id="date" name="date" type="date"/></td>
                 </tr>
                 <tr>
                     <td>住院号</td>
-                    <td><input id="admissionNumber1" name="prePay" type="admissionNumber"/></td>
+                    <td><input id="admissionNumber1" name="admissionNumber"/></td>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -222,20 +237,45 @@
         </form>
     </div>
 
-    <div style="width: 80%; background-color:skyblue; text-align: center; margin:30px auto; padding-bottom: 20px;">
-        <form id="fm8" action="">
+    <div style="width: 80%; background-color:pink; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm10" action="">
             <table style="margin: auto;">
                 <tr>
-                    <td colspan="2"><h1 style="font-size: 30px;">查询一日住院费用明细</h1></td>
+                    <td colspan="2"><h1 style="font-size: 30px; letter-spacing: 0px;">用户支付成功后，公众号系统调用此接口将支付成功信息通知院内系统</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber8" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>支付单号</td>
+                    <td><input id="outTradeNo" name="outTradeNo"/></td>
+                </tr>
+                <tr>
+                    <td>金额</td>
+                    <td><input id="amount" name="amount"/></td>
+                </tr>
+                <tr>
+                    <td>支付时间</td>
+                    <td><input id="payTime" name="payTime"/></td>
+                </tr>
+                <tr>
+                    <td>支付方式</td>
+                    <td><input id="payType" name="payType"/></td>
+                </tr>
+                <tr>
+                    <td>待缴费明细中的id</td>
+                    <td><input id="detailId" name="detailId"/></td>
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <a id="submit8">查询</a>
+                        <a id="submit10">查询</a>
                     </td>
                 </tr>
             </table>
         </form>
     </div>
+
 </div>
 <script>
     $(function() {
@@ -400,6 +440,54 @@
             $.ajax({
                 url:"/selectAllInHospital",
                 type:"POST",
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //查询一日住院费用明细
+        $('#submit9').click(function() {
+            var d = {};
+            var t = $('#fm9').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            console.log(d);
+            $.ajax({
+                url:"/selectOneDay",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //用户支付成功后，公众号系统调用此接口将支付成功信息通知院内系统
+        $('#submit10').click(function() {
+            var d = {};
+            var t = $('#fm10').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            console.log(d);
+            $.ajax({
+                url:"/paymentSuccess",
+                type:"POST",
+                data:d,
                 success: function (result) {
                     console.log(result);
                     if (result.success) {

@@ -25,4 +25,7 @@ public interface IndexService {
 
     Map<String, Object> selectAllInHospital();
 
+    Map<String, Object> selectOneDay(String medicalCardNumber, String date, String admissionNumber);
+
+    Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId);
 }

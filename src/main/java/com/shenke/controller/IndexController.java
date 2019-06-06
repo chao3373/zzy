@@ -112,4 +112,25 @@ public class IndexController {
         return indexService.selectAllInHospital();
     }
 
+    /***
+     * 查询一日住院费用明细
+     * @param medicalCardNumber
+     * @param date
+     * @param admissionNumber
+     * @return
+     */
+    @RequestMapping("/selectOneDay")
+    public Map<String, Object> selectOneDay(String medicalCardNumber, String date, String admissionNumber) {
+
+        return indexService.selectOneDay(medicalCardNumber, date, admissionNumber);
+    }
+
+    /***
+     * 用户支付成功后，公众号系统调用此接口将支付成功信息通知院内系统
+     * @return
+     */
+    @RequestMapping("/paymentSuccess")
+    public Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId) {
+        return indexService.paymentSuccess(medicalCardNumber, outTradeNo, amount, payTime, payType, detailId);
+    }
 }
