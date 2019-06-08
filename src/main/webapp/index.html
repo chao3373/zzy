@@ -276,6 +276,80 @@
         </form>
     </div>
 
+    <div style="width: 80%; background-color:pink; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm11" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1 style="font-size: 30px; letter-spacing: 0px;">就诊卡充值</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber9" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>公众号系统订单号</td>
+                    <td><input id="outTradeNo1" name="outTradeNo"/></td>
+                </tr>
+                <tr>
+                    <td>支付金额</td>
+                    <td><input id="payAmount" name="payAmount"/></td>
+                </tr>
+                <tr>
+                    <td>支付方式</td>
+                    <td><input id="payType1" name="payType"/></td>
+                </tr>
+                <tr>
+                    <td>支付时间</td>
+                    <td><input id="payTime1" name="payTime"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit11">查询</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%; background-color:pink; text-align: center; margin:30px auto; padding-bottom: 20px;">
+        <form id="fm12" action="">
+            <table style="margin: auto;">
+                <tr>
+                    <td colspan="2"><h1 style="font-size: 30px; letter-spacing: 0px;">缴纳住院押金</h1></td>
+                </tr>
+                <tr>
+                    <td>就诊卡号</td>
+                    <td><input id="medicalCardNumber10" name="medicalCardNumber"/></td>
+                </tr>
+                <tr>
+                    <td>住院号</td>
+                    <td><input id="admissionNumber2" name="admissionNumber"/></td>
+                </tr>
+                <tr>
+                    <td>金额</td>
+                    <td><input id="amount2" name="amount"/></td>
+                </tr>
+                <tr>
+                    <td>订单号</td>
+                    <td><input id="outTradeNo2" name="outTradeNo"/></td>
+                </tr>
+                <tr>
+                    <td>支付方式</td>
+                    <td><input id="payType2" name="payType"/></td>
+                </tr>
+                <tr>
+                    <td>支付时间</td>
+                    <td><input id="payTime2" name="payTime"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <a id="submit12">查询</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
 </div>
 <script>
     $(function() {
@@ -500,6 +574,53 @@
             });
         });
 
+        //就诊卡充值
+        $('#submit11').click(function() {
+            var d = {};
+            var t = $('#fm11').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            console.log(d);
+            $.ajax({
+                url:"/cardRecharge",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
+
+        //缴纳住院押金
+        $('#submit12').click(function() {
+            var d = {};
+            var t = $('#fm12').serializeArray();
+            $.each(t, function() {
+                d[this.name] = this.value;
+            });
+            console.log(d);
+            $.ajax({
+                url:"/paymentPledge",
+                type:"POST",
+                data:d,
+                success: function (result) {
+                    console.log(result);
+                    if (result.success) {
+                        console.log(result);
+                        alert(JSON.stringify(result.data));
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            });
+        });
     });
 </script>
 </body>

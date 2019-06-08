@@ -28,4 +28,11 @@ public interface IndexService {
     Map<String, Object> selectOneDay(String medicalCardNumber, String date, String admissionNumber);
 
     Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId);
+
+    Map<String, Object> cardRecharge(String medicalCardNumber, String outTradeNo, String payAmount, String payType, String payTime);
+
+    Map<String, Object> paymentPledge(String medicalCardNumber, String admissionNumber, String amount, String outTradeNo, String payType, String payTime);
+
+
+
 }

@@ -1,9 +1,13 @@
 package com.shenke.service;
 
 import cn.hutool.json.JSONObject;
+import com.shenke.Entity.CardRecharge;
+import com.shenke.Entity.PaymentMessage;
+import com.shenke.Entity.PaymentPledge;
 import com.shenke.util.DaoUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -17,6 +21,15 @@ import java.util.Map;
  */
 @Service("indexService")
 public class IndexServiceImpl implements IndexService {
+
+    @Resource
+    private PaymentMessageService paymentMessageService;
+
+    @Resource
+    private CardRechargeService cardRechargeService;
+
+    @Resource
+    private PaymentPledgeService paymentPledgeService;
 
     /***
      * 办理电子健康卡
@@ -367,7 +380,7 @@ public class IndexServiceImpl implements IndexService {
                         "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
                         "and b.medicalCardNumber=?");
 
-                preparedStatement.setString(1,medicalCardNumber);
+                preparedStatement.setString(1, medicalCardNumber);
                 resultSet = preparedStatement.executeQuery();
 
             } else {
@@ -452,12 +465,12 @@ public class IndexServiceImpl implements IndexService {
             List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
 
             if (list.size() == 0) {
-                map.put("success",false);
+                map.put("success", false);
                 map.put("msg", "没有查询到符合条件的记录");
                 map.put("code", "10002");
                 return map;
             } else {
-                map.put("success",true);
+                map.put("success", true);
                 map.put("msg", "成功");
                 map.put("code", "10001");
 //                System.out.println(list.get(0));
@@ -467,7 +480,7 @@ public class IndexServiceImpl implements IndexService {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            map.put("success",false);
+            map.put("success", false);
             map.put("msg", "未知错误");
             map.put("code", "10003");
             return map;
@@ -630,11 +643,14 @@ public class IndexServiceImpl implements IndexService {
      */
     @Override
     public Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId) {
+
+
         Map<String, Object> map = new HashMap<>();
 
         Connection connection = DaoUtil.getConnection();
         String msg = "";
         try {
+
             CallableStatement callableStatement = connection.prepareCall("{? = call WeiXin_CreateRecipeDetail(?,?)}");
             callableStatement.registerOutParameter(1, Types.NUMERIC);
             callableStatement.setString(2, medicalCardNumber);
@@ -670,7 +686,7 @@ public class IndexServiceImpl implements IndexService {
                 CallableStatement callableStatement1 = connection.prepareCall("{? = call WeiXin_RecipeSettl(?,?,?)}");
                 callableStatement1.registerOutParameter(1, Types.NUMERIC);
                 callableStatement1.setString(2, medicalCardNumber);
-                callableStatement1.setString(3,amount);
+                callableStatement1.setString(3, amount);
                 callableStatement1.registerOutParameter(4, Types.VARCHAR);
                 callableStatement1.execute();
                 System.out.println(callableStatement1.getInt(1));
@@ -735,6 +751,14 @@ public class IndexServiceImpl implements IndexService {
                     map.put("msg", msg);
                     map.put("code", "10002");
                 } else {
+                    PaymentMessage paymentMessage = new PaymentMessage();
+                    paymentMessage.setMedicalCardNumber(medicalCardNumber);
+                    paymentMessage.setAmount(Double.parseDouble(amount));
+                    paymentMessage.setDetailId(detailId);
+                    paymentMessage.setOutTradeNo(outTradeNo);
+                    paymentMessage.setPayTime(new Date(new SimpleDateFormat("yyyy-MM-dd").parse(payTime).getTime()));
+                    paymentMessage.setPayType(payType);
+                    paymentMessageService.save(paymentMessage);
                     Map<String, Object> map1 = new HashMap<>();
                     map1.put("outPrepayId", callableStatement1.getString(4));
                     Map<String, Object> map2 = this.selectPaymentInformation(medicalCardNumber);
@@ -758,6 +782,143 @@ public class IndexServiceImpl implements IndexService {
             msg = "未知错误";
             map.put("success", false);
             map.put("msg", msg);
+            map.put("code", "10003");
+            return map;
+        }
+    }
+
+    /***
+     * 就诊卡充值
+     * @param medicalCardNumber
+     * @param outTradeNo
+     * @param payAmount
+     * @param payType
+     * @param payTime
+     * @return
+     */
+    @Override
+    public Map<String, Object> cardRecharge(String medicalCardNumber, String outTradeNo, String payAmount, String payType, String payTime) {
+        Map<String, Object> map = new HashMap<>();
+
+        Connection connection = DaoUtil.getConnection();
+        String msg = "";
+        try {
+            CallableStatement callableStatement = connection.prepareCall("{? = call WeiXin_CardCharge(?,?,?,?,?)}");
+            callableStatement.registerOutParameter(1, Types.NUMERIC);
+            callableStatement.setString(2, medicalCardNumber);
+            callableStatement.setString(3, outTradeNo);
+            callableStatement.setDouble(4, Double.parseDouble(payAmount));
+            callableStatement.setString(5, payType);
+            callableStatement.setDate(6, new Date(new SimpleDateFormat("yyyy-MM-dd").parse(payTime).getTime()));
+            callableStatement.execute();
+
+            switch (callableStatement.getInt(1)) {
+                case 1:
+                    msg = "获取卡信息出错";
+                    break;
+                case 2:
+                    msg = "插入充值明细出错";
+                    break;
+                case 3:
+                    msg = "更新就诊卡余额出错";
+                    break;
+            }
+            if (callableStatement.getInt(1) != 0) {
+                map.put("success", false);
+                map.put("msg", msg);
+                map.put("code", "10002");
+                return map;
+            } else {
+                CardRecharge cardRecharge = new CardRecharge();
+                cardRecharge.setMedicalCardNumber(medicalCardNumber);
+                cardRecharge.setOutTradeNo(outTradeNo);
+                cardRecharge.setPayAmount(Double.parseDouble(payAmount));
+                cardRecharge.setPayTime(new Date(new SimpleDateFormat("yyyy-MM-dd").parse(payTime).getTime()));
+                cardRecharge.setPayType(payType);
+                cardRechargeService.save(cardRecharge);
+
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10002");
+                Map<String, Object> map1 = new HashMap<>();
+//                map.put("data", );
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        }
+    }
+
+    /***
+     * 缴纳住院押金
+     * @param medicalCardNumber
+     * @param admissionNumber
+     * @param amount
+     * @param outTradeNo
+     * @param payType
+     * @param payTime
+     * @return
+     */
+    @Override
+    public Map<String, Object> paymentPledge(String medicalCardNumber, String admissionNumber, String amount, String outTradeNo, String payType, String payTime) {
+        Map<String, Object> map = new HashMap<>();
+
+        Connection connection = DaoUtil.getConnection();
+        String msg = "";
+
+        try {
+            CallableStatement callableStatement = connection.prepareCall("{? = call WeiXin_LDPreCharge()}");
+            callableStatement.registerOutParameter(1, Types.NUMERIC);
+            callableStatement.execute();
+
+            switch (callableStatement.getInt(1)) {
+                case 1:
+                    msg = "查询住院记录信息错误，有二条以上未了出院记录，请根据住院ID缴费";
+                    break;
+                case 2:
+                    msg = "未查询到住院记录信息";
+                    break;
+                case 3:
+                    msg = "提取住院信息出错";
+                    break;
+                case 4:
+                    msg = "插入充值明细出错";
+                    break;
+                case 5:
+                    msg = "更新住院总表信息出错";
+                    break;
+            }
+            if (callableStatement.getInt(1) != 0) {
+                map.put("success", false);
+                map.put("msg", msg);
+                map.put("code", "10002");
+                return map;
+            } else {
+                PaymentPledge paymentPledge = new PaymentPledge();
+                paymentPledge.setAdmissionNumber(admissionNumber);
+                paymentPledge.setAmount(Double.parseDouble(amount));
+                paymentPledge.setMedicalCardNumber(medicalCardNumber);
+                paymentPledge.setOutTradeNo(outTradeNo);
+                paymentPledge.setPayType(payType);
+                paymentPledge.setPayTime(new Date(new SimpleDateFormat("yyyy-MM-dd").parse(payTime).getTime()));
+                paymentPledgeService.save(paymentPledge);
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10002");
+                Map<String, Object> map1 = new HashMap<>();
+//                map.put("data", );
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
             map.put("code", "10003");
             return map;
         }

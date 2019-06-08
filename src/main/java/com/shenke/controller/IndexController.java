@@ -133,4 +133,33 @@ public class IndexController {
     public Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId) {
         return indexService.paymentSuccess(medicalCardNumber, outTradeNo, amount, payTime, payType, detailId);
     }
+
+    /***
+     * 就诊卡充值
+     * @param medicalCardNumber
+     * @param outTradeNo
+     * @param payAmount
+     * @param payType
+     * @param payTime
+     * @return
+     */
+    @RequestMapping("/cardRecharge")
+    public Map<String, Object> cardRecharge(String medicalCardNumber, String outTradeNo, String payAmount, String payType, String payTime) {
+        return indexService.cardRecharge(medicalCardNumber, outTradeNo, payAmount, payType, payTime);
+    }
+
+    /***
+     * 缴纳住院押金
+     * @param medicalCardNumber
+     * @param admissionNumber
+     * @param amount
+     * @param outTradeNo
+     * @param payType
+     * @param payTime
+     * @return
+     */
+    @RequestMapping("/paymentPledge")
+    public Map<String, Object> paymentPledge(String medicalCardNumber, String admissionNumber, String amount, String outTradeNo, String payType, String payTime) {
+        return indexService.paymentPledge(medicalCardNumber, admissionNumber, amount, outTradeNo, payType, payTime);
+    }
 }
