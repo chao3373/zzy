@@ -1,8 +1,8 @@
 ## db.setting文件
 
-url = jdbc:sqlserver://localhost:1433/zyyhis
+url = jdbc:sqlserver://10.10.10.1:1433/his
 user = sa
-pass = root
+pass = abc-123
 driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 ## 可选配置

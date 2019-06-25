@@ -78,6 +78,10 @@ public class IndexServiceImpl implements IndexService {
                 case 5:
                     msg = "插入卡信息主表错误";
                     break;
+                case 6:
+                    msg = "该卡号已占用";
+                    break;
+
             }
 
             if (callableStatement.getInt(1) != 0) {

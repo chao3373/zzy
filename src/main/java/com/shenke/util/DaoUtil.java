@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public class DaoUtil {
     static final String driverName = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    static final String dbURL = "jdbc:sqlserver://localhost:1433;DatabaseName=zyyhis";
+    static final String dbURL = "jdbc:sqlserver://10.10.10.1:1433;DatabaseName=his";
     static final String Name = "sa";
-    static final String Pwd = "root";
+    static final String Pwd = "abc-123";
 
     public static Connection getConnection() {
         try {
