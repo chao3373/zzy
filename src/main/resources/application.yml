@@ -17,9 +17,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://10.10.10.1:1433;Databasename=his
+    url: jdbc:sqlserver://192.168.56.132:1433;Databasename=zyyhis
     username: sa
-    password: abc-123
+    password: his168?
   jpa:
     database: sql_server
     hibernate:
