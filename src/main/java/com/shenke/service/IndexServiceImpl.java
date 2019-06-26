@@ -161,23 +161,21 @@ public class IndexServiceImpl implements IndexService {
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("select \n" +
-                    "a.RiQi as createDate,\n" +
                     "b.xingming as name,\n" +
-                    "b.LianXiDH as  phone,\n" +
-                    "b.XingBie as  sex,\n" +
+                    "b.LianXiDH as  phone,\n" +
+                    "b.XingBie as  sex,\n" +
                     "b.ZhuZhi as address,\n" +
-                    "b.ChuShengNY as  birthdate,\n" +
-                    "c.ShenFenZH as  idCardNo,\n" +
+                    "b.ChuShengNY as  birthdate,\n" +
+                    "c.ShenFenZH as  idCardNo,\n" +
                     "a.CardNo as medicalCardNumber\n" +
                     "From Card_MasterInfo a,PA_PatientInfo b,PA_PatientInfoExt c\n" +
-                    "where a.CardNo=b.JiuZhenKH and b.BingLiLH=c.BingLiLH AND a.CardNo = ?");
+                    "where a.CardNo=b.JiuZhenKH and b.BingLiLH=c.BingLiLH\n" +
+                    "and b.medicalCardNumber= ?");
             preparedStatement.setString(1, oldMedicalCardNumber);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
 
-            System.out.println(list);
-            System.out.println(list.size());
             if (list.size() == 0) {
                 map.put("success", false);
                 map.put("msg", "没有查询到该卡号");
@@ -185,11 +183,13 @@ public class IndexServiceImpl implements IndexService {
                 return map;
             }
 
-            PreparedStatement preparedStatement1 = connection.prepareStatement("update Card_MasterInfo set CardNo= ? where CardNo =?");
+            PreparedStatement preparedStatement1 = connection.prepareStatement("update Card_MasterInfo set CardNo= ?\n" +
+                    "where CardNo=?");
             preparedStatement1.setString(1, newMedicalCardNumber);
             preparedStatement1.setString(2, oldMedicalCardNumber);
 
-            PreparedStatement preparedStatement2 = connection.prepareStatement("update PA_PatientInfo set CardNo= ?,JiuZhenKH=? where CardNo= ?");
+            PreparedStatement preparedStatement2 = connection.prepareStatement("update PA_PatientInfo set CardNo= ?,JiuZhenKH=?\n" +
+                    "where CardNo= ?");
             preparedStatement2.setString(1, newMedicalCardNumber);
             preparedStatement2.setString(2, newMedicalCardNumber);
             preparedStatement2.setString(3, oldMedicalCardNumber);
