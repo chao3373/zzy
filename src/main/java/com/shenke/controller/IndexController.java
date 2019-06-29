@@ -1,5 +1,7 @@
 package com.shenke.controller;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.shenke.service.IndexService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,6 +63,9 @@ public class IndexController {
                 sb.append(str);
             }
             System.out.println(sb.toString());
+            JSONObject jsonObject = JSONUtil.parseObj(br.toString());
+            medicalCardNumber = (String)jsonObject.get("medicalCardNumber");
+            System.out.println(medicalCardNumber);
         } catch (IOException e) {
             e.printStackTrace();
         }
