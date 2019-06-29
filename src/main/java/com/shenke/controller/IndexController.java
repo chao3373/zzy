@@ -50,7 +50,13 @@ public class IndexController {
      */
     @RequestMapping("/selectByMedicalCardNumber")
     public Map<String, Object> selectByMedicalCardNumber(HttpServletRequest request, String medicalCardNumber) {
+        System.out.println("请求体长度：" + request.getContentLength());
+        System.out.println("请求体类型：" + request.getContentType());
+        System.out.println("参数名：" + request.getParameterNames());
+        System.out.println("参数：" + request.getParameterMap());
         System.out.println("请求参数：" + request.getQueryString());
+        System.out.println("URL：" + request.getRequestURL());
+        System.out.println("url中的资源部分：" + request.getRequestURI());
         System.out.println("==========");
         System.out.println(medicalCardNumber);
         return indexService.selectByMedicalCardNumber(medicalCardNumber);
