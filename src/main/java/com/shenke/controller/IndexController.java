@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +49,10 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/selectByMedicalCardNumber")
-    public Map<String, Object> selectByMedicalCardNumber(String medicalCardNumber) {
+    public Map<String, Object> selectByMedicalCardNumber(HttpServletRequest request, String medicalCardNumber) {
+        System.out.println("请求参数：" + request.getQueryString());
+        System.out.println("==========");
+        System.out.println(medicalCardNumber);
         return indexService.selectByMedicalCardNumber(medicalCardNumber);
     }
 
