@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +53,17 @@ public class IndexController {
      */
     @RequestMapping("/selectByMedicalCardNumber")
     public Map<String, Object> selectByMedicalCardNumber(HttpServletRequest request, String medicalCardNumber) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String str = "";
+            while ((str = br.readLine()) != null) {
+                sb.append(str);
+            }
+            System.out.println(sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("请求体长度：" + request.getContentLength());
         System.out.println("请求体类型：" + request.getContentType());
         System.out.println("参数名：" + request.getParameterNames());
