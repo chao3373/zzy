@@ -1,19 +1,7 @@
 server:
   port: 8080
 
-#spring:
-#  datasource:
-#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#    url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=zyyhis
-#    username: sa
-#    password: root
 
-#spring:
-#  datasource:
-#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#    url: jdbc:sqlserver://localhost:1433;Databasename=zyyhis
-#    username: sa
-#    password: root
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

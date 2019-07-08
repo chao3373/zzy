@@ -1,18 +1,15 @@
 package com.shenke.controller;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.shenke.service.IndexService;
+import com.shenke.util.GetRequestBodyUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,19 +26,20 @@ public class IndexController {
 
     /***
      *办理电子健康卡
-     * @param medicalCardNumber
-     * @param name
-     * @param sex
-     * @param birthday
-     * @param address
-     * @param idcard
-     * @param phone
      * @return
      */
     @RequestMapping("/insertCard")
-    public Map<String, Object> insertCard(String medicalCardNumber, String name, String sex, String birthday, String address, String idcard, String phone) {
-        Map<String, Object> map = indexService.insertCard(medicalCardNumber, name, sex, birthday, address, idcard, phone);
-        System.out.println(map);
+    public Map<String, Object> insertCard(HttpServletRequest request) throws IOException {
+        List<String> strs = new ArrayList<>();
+        strs.add("medicalCardNumber");
+        strs.add("name");
+        strs.add("sex");
+        strs.add("birthday");
+        strs.add("address");
+        strs.add("idcard");
+        strs.add("phone");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, strs);
+        Map<String, Object> map = indexService.insertCard(stringg.get(0), stringg.get(1),stringg.get(2), stringg.get(3), stringg.get(4), stringg.get(5), stringg.get(6));
         if (map != null) {
             return map;
         }
@@ -50,35 +48,12 @@ public class IndexController {
 
     /***
      *根据就诊卡号查询用户信息
-     * @param medicalCardNumber
+     * @param
      * @return
      */
     @RequestMapping("/selectByMedicalCardNumber")
-    public Map<String, Object> selectByMedicalCardNumber(HttpServletRequest request, String medicalCardNumber) {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String str = "";
-            while ((str = br.readLine()) != null) {
-                sb.append(str);
-            }
-            System.out.println(sb.toString());
-            JSONObject jsonObject = JSONUtil.parseObj(br.toString());
-            medicalCardNumber = (String)jsonObject.get("medicalCardNumber");
-            System.out.println(medicalCardNumber);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("请求体长度：" + request.getContentLength());
-        System.out.println("请求体类型：" + request.getContentType());
-        System.out.println("参数名：" + request.getParameterNames());
-        System.out.println("参数：" + request.getParameterMap());
-        System.out.println("请求参数：" + request.getQueryString());
-        System.out.println("URL：" + request.getRequestURL());
-        System.out.println("url中的资源部分：" + request.getRequestURI());
-        System.out.println("==========");
-        System.out.println(medicalCardNumber);
-        return indexService.selectByMedicalCardNumber(medicalCardNumber);
+    public Map<String, Object> selectByMedicalCardNumber(HttpServletRequest request) {
+        return indexService.selectByMedicalCardNumber(GetRequestBodyUtil.getString(request, "medicalCardNumber"));
     }
 
     /***
@@ -86,50 +61,58 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/updateMedicalCardNumber")
-    public Map<String, Object> updateMedicalCardNumber(String name, String oldMedicalCardNumber, String newMedicalCardNumber) {
-        return indexService.updateMedicalCardNumber(name, oldMedicalCardNumber, newMedicalCardNumber);
+    public Map<String, Object> updateMedicalCardNumber(HttpServletRequest request) {
+        List<String> strings = new ArrayList<>();
+        strings.add("name");
+        strings.add("oldMedicalCardNumber");
+        strings.add("newMedicalCardNumber");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, strings);
+        return indexService.updateMedicalCardNumber(stringg.get(0), stringg.get(1), stringg.get(2));
     }
 
     /***
      * 待缴费信息查询接口
-     * @param medicalCardNumber
+     * @param
      * @return
      */
     @RequestMapping("/selectPaymentInformation")
-    public Map<String, Object> selectPaymentInformation(String medicalCardNumber) {
-        return indexService.selectPaymentInformation(medicalCardNumber);
+    public Map<String, Object> selectPaymentInformation(HttpServletRequest request) {
+        return indexService.selectPaymentInformation(GetRequestBodyUtil.getString(request, "medicalCardNumber"));
     }
 
     /***
      * 查询就诊卡余额
-     * @param medicalCardNumber
+     * @param
      * @return
      */
     @RequestMapping("/selectBalance")
-    public Map<String, Object> selectBalance(String medicalCardNumber) {
-        System.out.println(medicalCardNumber);
-        return indexService.selectBalance(medicalCardNumber);
+    public Map<String, Object> selectBalance(HttpServletRequest request) {
+        return indexService.selectBalance(GetRequestBodyUtil.getString(request, "medicalCardNumber"));
     }
 
     /***
      * 查询住院信息
-     * @param medicalCardNumber
-     * @param admissionNumber
+     * @param
+     * @param
      * @return
      */
     @RequestMapping("/selectMessage")
-    public Map<String, Object> selectMessage(String medicalCardNumber, String admissionNumber) {
-        return indexService.selectMessage(medicalCardNumber, admissionNumber);
+    public Map<String, Object> selectMessage(HttpServletRequest request) {
+        List<String> list = new ArrayList<>();
+        list.add("medicalCardNumber");
+        list.add("admissionNumber");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.selectMessage(stringg.get(0), stringg.get(1));
     }
 
     /***
      * 获取住院押金欠费用户信息
-     * @param prePay
+     * @param
      * @return
      */
     @RequestMapping("/selectArrearageUserMessage")
-    public Map<String, Object> selectArrearageUserMessage(Double prePay) {
-        return indexService.selectArrearageUserMessage(prePay);
+    public Map<String, Object> selectArrearageUserMessage(HttpServletRequest request) {
+        return indexService.selectArrearageUserMessage(Double.parseDouble(GetRequestBodyUtil.getString(request, "prePay")));
     }
 
     /***
@@ -137,21 +120,25 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/selectAllInHospital")
-    public Map<String, Object> selectAllInHospital() {
+    public Map<String, Object> selectAllInHospital(){
         return indexService.selectAllInHospital();
     }
 
     /***
      * 查询一日住院费用明细
-     * @param medicalCardNumber
-     * @param date
-     * @param admissionNumber
+     * @param
+     * @param
+     * @param
      * @return
      */
     @RequestMapping("/selectOneDay")
-    public Map<String, Object> selectOneDay(String medicalCardNumber, String date, String admissionNumber) {
-
-        return indexService.selectOneDay(medicalCardNumber, date, admissionNumber);
+    public Map<String, Object> selectOneDay(HttpServletRequest request) {
+        List<String> list = new ArrayList<>();
+        list.add("medicalCardNumber");
+        list.add("admissionNumber");
+        list.add("date");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.selectOneDay(stringg.get(0), stringg.get(1), stringg.get(2));
     }
 
     /***
@@ -159,36 +146,59 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/paymentSuccess")
-    public Map<String, Object> paymentSuccess(String medicalCardNumber, String outTradeNo, String amount, String payTime, String payType, String detailId) {
-        return indexService.paymentSuccess(medicalCardNumber, outTradeNo, amount, payTime, payType, detailId);
+    public Map<String, Object> paymentSuccess(HttpServletRequest request) {
+        List<String> list = new ArrayList<>();
+        list.add("medicalCardNumber");
+        list.add("outTradeNo");
+        list.add("amount");
+        list.add("payTime");
+        list.add("payType");
+        list.add("detailId");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.paymentSuccess(stringg.get(0), stringg.get(1), stringg.get(2), stringg.get(3), stringg.get(4), stringg.get(5));
     }
 
     /***
      * 就诊卡充值
-     * @param medicalCardNumber
-     * @param outTradeNo
-     * @param payAmount
-     * @param payType
-     * @param payTime
+     * @param
+     * @param
+     * @param
+     * @param
+     * @param
      * @return
      */
     @RequestMapping("/cardRecharge")
-    public Map<String, Object> cardRecharge(String medicalCardNumber, String outTradeNo, String payAmount, String payType, String payTime) {
-        return indexService.cardRecharge(medicalCardNumber, outTradeNo, payAmount, payType, payTime);
+    public Map<String, Object> cardRecharge(HttpServletRequest request) {
+        List<String> list = new ArrayList<>();
+        list.add("medicalCardNumber");
+        list.add("outTradeNo");
+        list.add("payAmount");
+        list.add("payType");
+        list.add("payTime");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.cardRecharge(stringg.get(0), stringg.get(1), stringg.get(2), stringg.get(3), stringg.get(4));
     }
 
     /***
      * 缴纳住院押金
-     * @param medicalCardNumber
-     * @param admissionNumber
-     * @param amount
-     * @param outTradeNo
-     * @param payType
-     * @param payTime
+     * @param/insertCard
+     * @param
+     * @param
+     * @param
+     * @param
+     * @param
      * @return
      */
     @RequestMapping("/paymentPledge")
-    public Map<String, Object> paymentPledge(String medicalCardNumber, String admissionNumber, String amount, String outTradeNo, String payType, String payTime) {
-        return indexService.paymentPledge(medicalCardNumber, admissionNumber, amount, outTradeNo, payType, payTime);
+    public Map<String, Object> paymentPledge(HttpServletRequest request) {
+        List<String> list = new ArrayList<>();
+        list.add("medicalCardNumber");
+        list.add("admissionNumber");
+        list.add("amount");
+        list.add("outTradeNo");
+        list.add("payType");
+        list.add("payTime");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.paymentPledge(stringg.get(0), stringg.get(1), stringg.get(2), stringg.get(3), stringg.get(4), stringg.get(5));
     }
 }

@@ -42,7 +42,6 @@ public class DaoUtil {
                 }
                 System.out.println(map1);
                 list.add(map1);
-                System.out.println(list);
             }
             return list;
         } catch (Exception e) {
