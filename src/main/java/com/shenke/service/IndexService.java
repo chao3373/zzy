@@ -1,5 +1,7 @@
 package com.shenke.service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,5 +36,21 @@ public interface IndexService {
     Map<String, Object> paymentPledge(String medicalCardNumber, String admissionNumber, String amount, String outTradeNo, String payType, String payTime);
 
 
+    Map<String, Object> queryHospitalizationRecord(String medicalCardNumber, String s1, String s2, String s3);
 
+    Map<String, Object> queryOutpatientCostDetail(String medicalCardNumber, String startTime, String endTime);
+
+    Map<String, Object> getSeeklingDocList(String medicalCardNumber, String beginTime, String endTime);
+
+    Map<String, Object> getOpenDrugList();
+
+    Map<String, Object> getOpenLISList();
+
+    Map<String, Object> getOpenCheckList();
+
+    Map<String, Object> getOpenDocItem();
+
+    Map<String, Object> baogaoMain(List<String> stringg);
+
+    Map<String, Object> baogaoMingXi(List<String> stringg);
 }

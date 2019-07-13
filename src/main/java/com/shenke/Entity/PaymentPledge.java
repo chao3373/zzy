@@ -1,7 +1,7 @@
 package com.shenke.Entity;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 @Table(name = "t_paymentPledge")
@@ -25,6 +25,7 @@ public class PaymentPledge {
     @Column(length = 100)
     private String payType;
 
+    @Temporal(TemporalType.TIMESTAMP)
     private Date payTime;
 
     @Override
