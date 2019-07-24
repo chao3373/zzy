@@ -1,7 +1,7 @@
 package com.shenke.Entity;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Date;
 
 @Entity
 @Table(name = "t_paymentMessage")
@@ -22,7 +22,6 @@ public class PaymentMessage {
     @Column(nullable = true)
     private Double amount; //金额
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date payTime;//支付时间
 
     @Column(length = 100)

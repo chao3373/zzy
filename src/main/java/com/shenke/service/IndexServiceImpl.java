@@ -2,11 +2,10 @@ package com.shenke.service;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
-import com.shenke.Entity.CardRecharge;
-import com.shenke.Entity.PaymentMessage;
-import com.shenke.Entity.PaymentPledge;
+import com.shenke.Entity.*;
 import com.shenke.util.DaoUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.swing.text.MaskFormatter;
@@ -24,6 +23,12 @@ import java.util.Map;
  */
 @Service("indexService")
 public class IndexServiceImpl implements IndexService {
+
+    @Resource
+    private BanKaService banKaService;
+
+    @Resource
+    private BangKaService bangKaService;
 
     @Resource
     private PaymentMessageService paymentMessageService;
@@ -92,6 +97,16 @@ public class IndexServiceImpl implements IndexService {
                 map.put("msg", msg);
                 map.put("code", "10002");
             } else {
+                BanKa banKa = new BanKa();
+                banKa.setMedicalCardNumber(medicalCardNumber);
+                banKa.setName(name);
+                banKa.setSex(sex);
+                banKa.setBirthday(birthday);
+                banKa.setAddress(address);
+                banKa.setIdcard(idcard);
+                banKa.setPhone(phone);
+                banKa.setDate(new Date(new java.util.Date().getTime()));
+                banKaService.save(banKa);
                 map.put("success", true);
                 map.put("msg", "成功");
                 map.put("code", "10001");
@@ -166,6 +181,7 @@ public class IndexServiceImpl implements IndexService {
             PreparedStatement preparedStatement = connection.prepareStatement("select \n" +
                     "b.xingming as name,\n" +
                     "b.LianXiDH as phone,\n" +
+                    "b.SerialNo as createDate,\n" +
                     "b.XingBie as sex,\n" +
                     "b.ZhuZhi as address,\n" +
                     "b.ChuShengNY as birthdate,\n" +
@@ -197,6 +213,17 @@ public class IndexServiceImpl implements IndexService {
             int i = preparedStatement1.executeUpdate();
             int j = preparedStatement2.executeUpdate();
             if (i > 0 && j > 0) {
+                BangKa bangKa = new BangKa();
+                bangKa.setName((String) list.get(0).get("name"));
+                bangKa.setPhone((String) list.get(0).get("phone"));
+                bangKa.setCreateDate((String) list.get(0).get("createDate"));
+                bangKa.setSex((String) list.get(0).get("sex"));
+                bangKa.setAddress((String) list.get(0).get("address"));
+                bangKa.setBirthdate((String) list.get(0).get("birthdate"));
+                bangKa.setIdCardNo((String) list.get(0).get("idCardNo"));
+                bangKa.setMedicalCardNumber((String) list.get(0).get("medicalCardNumber"));
+                bangKa.setDate(new Date(new java.util.Date().getTime()));
+                bangKaService.save(bangKa);
                 map.put("success", true);
                 map.put("msg", "成功");
                 map.put("code", "10001");
@@ -258,7 +285,7 @@ public class IndexServiceImpl implements IndexService {
             } else {
                 PreparedStatement preparedStatement1 = connection.prepareStatement(
                         "select \n" +
-                                "B.YaoPinID AS id,\n" +
+                                "B.id AS id,\n" +
                                 "b.YaoMing as item,\n" +
                                 "b.DanJia as price,\n" +
                                 "b.Shuliang as quantity,\n" +
@@ -364,61 +391,38 @@ public class IndexServiceImpl implements IndexService {
     public Map<String, Object> selectMessage(String medicalCardNumber, String admissionNumber) {
         Map<String, Object> map = new HashMap<>();
         Connection connection = DaoUtil.getConnection();
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
         System.out.println("medicalCardNumber长度：" + medicalCardNumber.length());
         try {
-            if (medicalCardNumber.length() >= 15) {
-                String sql = "select \n" +
-                        "b.medicalCardNumber as medicalCardNumber,\n" +
-                        "a.ZhuYuanID as  admissionNumber,\n" +
-                        "a.XingMing as  inPatName,\n" +
-                        "d.KeShiMC as  deptName,\n" +
-                        "a.ChuangHao as  bedNumber,\n" +
-                        "a.JiZhangKuan as  totalCost,\n" +
-                        "a.YuFuKuan as  totalPrepay,\n" +
-                        "a.JieYuKuan  prepayLeft,\n" +
-                        "0 as minimumPayment,\n" +
-                        "100000 as maximumPayment,\n" +
-                        "a.XingBie  sex,\n" +
-                        "convert(varchar(19),a.RuYuanSJ,120) as patInTime,\n" +
-                        "c.ShenFenZH as idCard,\n" +
-                        "b.LianXiDH as phone\n" +
-                        "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
-                        "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
-                        "and b.medicalCardNumber=?";
-                preparedStatement = connection.prepareStatement(sql);
-                System.out.println(sql);
-                System.out.println(medicalCardNumber);
+            String sql = "select \n" +
+                    "b.medicalCardNumber as medicalCardNumber,\n" +
+                    "a.ZhuYuanID as  admissionNumber,\n" +
+                    "a.XingMing as  inPatName,\n" +
+                    "d.KeShiMC as  deptName,\n" +
+                    "a.ChuangHao as  bedNumber,\n" +
+                    "a.JiZhangKuan as  totalCost,\n" +
+                    "a.YuFuKuan as  totalPrepay,\n" +
+                    "a.JieYuKuan  prepayLeft,\n" +
+                    "0 as minimumPayment,\n" +
+                    "100000 as maximumPayment,\n" +
+                    "a.XingBie  sex,\n" +
+                    "convert(varchar(19),a.RuYuanSJ,120) as patInTime,\n" +
+                    "c.ShenFenZH as idCard,\n" +
+                    "b.LianXiDH as phone\n" +
+                    "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
+                    "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
+                    "and (b.medicalCardNumber=? or a.ZhuYuanID=?)";
+
+            System.out.println(sql);
+            System.out.println(medicalCardNumber);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            if (!StringUtils.isEmpty(medicalCardNumber)) {
                 preparedStatement.setString(1, medicalCardNumber);
-                resultSet = preparedStatement.executeQuery();
-
+                preparedStatement.setString(2, medicalCardNumber);
             } else {
-                String sql = "select \n" +
-                        "b.medicalCardNumber as medicalCardNumber,\n" +
-                        "a.ZhuYuanID as  admissionNumber,\n" +
-                        "a.XingMing as  inPatName,\n" +
-                        "d.KeShiMC as  deptName,\n" +
-                        "a.ChuangHao as  bedNumber,\n" +
-                        "a.JiZhangKuan as  totalCost,\n" +
-                        "a.YuFuKuan as  totalPrepay,\n" +
-                        "a.JieYuKuan  prepayLeft,\n" +
-                        "0 as minimumPayment,\n" +
-                        "100000 as maximumPayment,\n" +
-                        "a.XingBie sex,\n" +
-                        "convert(varchar(19),a.RuYuanSJ,120) as patInTime,\n" +
-                        "c.ShenFenZH as idCard,\n" +
-                        "b.LianXiDH as phone\n" +
-                        "From LD_Register a,PA_PatientInfo b,PA_PatientInfoExt c,Dict_Depart d\n" +
-                        "where a.ZhuYuanHao=b.ZhuYuanHao and b.BingLiLH=c.BingLiLH and a.KeShiBM =d.KeShiBM \n" +
-                        "and a.ZhuYuanID=?";
-                preparedStatement = connection.prepareStatement(sql);
-                System.out.println(sql);
-                System.out.println(admissionNumber);
                 preparedStatement.setString(1, admissionNumber);
-                resultSet = preparedStatement.executeQuery();
+                preparedStatement.setString(2, admissionNumber);
             }
-
+            ResultSet resultSet = preparedStatement.executeQuery();
             List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
             if (list.size() == 0) {
                 map.put("success", false);
@@ -433,7 +437,8 @@ public class IndexServiceImpl implements IndexService {
                 return map;
             }
 
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             e.printStackTrace();
             map.put("success", false);
             map.put("msg", "未知错误");
@@ -446,6 +451,7 @@ public class IndexServiceImpl implements IndexService {
                 e.printStackTrace();
             }
         }
+
     }
 
     /***
@@ -855,7 +861,7 @@ public class IndexServiceImpl implements IndexService {
                 cardRecharge.setOutTradeNo(outTradeNo);
                 cardRecharge.setPayAmount(Double.parseDouble(payAmount));
                 java.util.Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(payTime);
-                cardRecharge.setPayTime(date);
+                cardRecharge.setPayTime(new Date(date.getTime()));
                 cardRecharge.setPayType(payType);
                 cardRechargeService.save(cardRecharge);
 
@@ -934,7 +940,7 @@ public class IndexServiceImpl implements IndexService {
                 paymentPledge.setOutTradeNo(outTradeNo);
                 paymentPledge.setPayType(payType);
                 java.util.Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(payTime);
-                paymentPledge.setPayTime(date);
+                paymentPledge.setPayTime(new Date(date.getTime()));
                 paymentPledgeService.save(paymentPledge);
                 map.put("success", true);
                 map.put("msg", "成功");
@@ -965,7 +971,7 @@ public class IndexServiceImpl implements IndexService {
     public Map<String, Object> queryHospitalizationRecord(String medicalCardNumber, String admissionNumber, String startTime, String endTime) {
         Map<String, Object> map = new HashMap<>();
         Connection connection = DaoUtil.getConnection();
-        String sql = "select a.ZhuYuanID as ID,\n" +
+        String sql = "select a.ZhuYuanID as id,\n" +
                 "RuYuanSJ as dateOfAdmission,\n" +
                 "case when ChuYuanSJ IS null then '' else ChuYuanSJ end as dateOfDischarge,\n" +
                 "b.KeShiMC as dept,\n" +
@@ -1528,5 +1534,147 @@ public class IndexServiceImpl implements IndexService {
         }
     }
 
+    /***
+     * 数据统计
+     * @param stringg
+     * @return
+     */
+    @Override
+    public Map<String, Object> tongji(List<String> stringg) {
+        Map<String, Object> map = new HashMap<>();
+        String startTime = stringg.get(0);
+        String endTime = stringg.get(1);
+        Connection connection = DaoUtil.getConnection();
+        String sql = "SELECT ((SELECT count(*) FROM t_card_recharge where convert(varchar(10),pay_time,120) between ? and ?) + (SELECT COUNT(*) FROM t_payment_message  where convert(varchar(10),pay_time,120) between ? and ?)) as outpatientTotalTrans,\n" +
+                "(SELECT ISNULL(sum(pay_amount), 0) FROM t_card_recharge  where convert(varchar(10),pay_time,120) between ? and ?) + (SELECT isnull(sum(amount), 0) from t_payment_message where convert(varchar(10),pay_time,120) between ? and ?)  as outpatientTotalAmount,\n" +
+                "(SELECT ISNULL(COUNT(*), 0) from t_payment_pledge where convert(varchar(10),pay_time,120) between ? and ?) as inpatientTotalTrans,\n" +
+                "(select ISNULL(sum(amount), 0) from t_payment_pledge where convert(varchar(10),pay_time,120) between ? and ?) as inpatientTotalAmount,\n" +
+                "(select sum(a.shuliang) from (select convert(varchar(10),danjurq,120)as ab, count(distinct medicalCardNumber) as shuliang from out_recipe a,out_invoice b,pa_patientinfo c where a.jiuzhenid=b.jiuzhenid and b.jiesuanzt=1 and a.binglihao=c.binglihao and convert(varchar(10),danjurq,120) between ? and ? group by convert(varchar(10),danjurq,120)) as a) as medicalTotal,\n" +
+                "(select ISNULL(COUNT(*), 0) from PA_PatientInfo where len(JiuZhenKH)>10 and convert(varchar(10),serialno,120) between ? and ?) as regCardAmount,\n" +
+                "(select ISNULL(COUNT(*), 0) from PA_PatientInfo where len(JiuZhenKH)>10 and convert(varchar(10),serialno,120) between ? and ?) as totalCardAmount";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, startTime);
+            preparedStatement.setString(2, endTime);
+            preparedStatement.setString(3, startTime);
+            preparedStatement.setString(4, endTime);
+            preparedStatement.setString(5, startTime);
+            preparedStatement.setString(6, endTime);
+            preparedStatement.setString(7, startTime);
+            preparedStatement.setString(8, endTime);
+            preparedStatement.setString(9, startTime);
+            preparedStatement.setString(10, endTime);
+            preparedStatement.setString(11, startTime);
+            preparedStatement.setString(12, endTime);
+            preparedStatement.setString(13, startTime);
+            preparedStatement.setString(14, endTime);
+            preparedStatement.setString(15, startTime);
+            preparedStatement.setString(16, endTime);
+            preparedStatement.setString(17, startTime);
+            preparedStatement.setString(18, endTime);
 
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Map<String, Object>> mapList = DaoUtil.getresultSet(resultSet);
+            if (mapList.size() == 0){
+                map.put("success", false);
+                map.put("msg", "查询成功但是没有记录");
+                map.put("code", "10002");
+                return map;
+            } else {
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("outpatientTotalAmount", mapList.get(0).get("outpatientTotalAmount"));
+                map.put("outpatientTotalTrans", mapList.get(0).get("outpatientTotalTrans"));
+                map.put("inpatientTotalAmount", mapList.get(0).get("inpatientTotalAmount"));
+                map.put("inpatientTotalTrans", mapList.get(0).get("inpatientTotalTrans"));
+                map.put("regCardAmount", mapList.get(0).get("regCardAmount"));
+                map.put("totalCardAmount", mapList.get(0).get("totalCardAmount"));
+                map.put("medicalTotal", mapList.get(0).get("medicalTotal"));
+                return map;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /***
+     * 住院费用明细
+     * @param stringg
+     * @return
+     */
+    @Override
+    public Map<String, Object> queryHospitalizationDetail(List<String> stringg) {
+        System.out.println(stringg);
+        Connection connection = DaoUtil.getConnection();
+        Map<String, Object> map = new HashMap<>();
+        String id = stringg.get(0);
+
+        System.out.println("id:" + id);
+        String sql = "select a.XingMing as name, a.XingBie as sex, c.XingMing as doctor, a.JiZhangKuan as total,a.ZhuYuanHao as admissionNumber,a.RuYuanZD as diagnosis, CONVERT(varchar(19),b.jiesuanrq,121) as time, b.YaoMing as item, d.HeSuanMC as type, b.DanJia as price, b.ShuLiang as quantity, b.JinE as amount  From LD_Register a,LD_ChargeDetail b,Dict_Personnel c,Dict_CheckItem d,pa_patientinfo e where a.ZhuYuanID=b.ZhuYuanID and b.JieSuanPC=a.JieZhangPC and b.HeSuanBM=d.HeSuanBM and a.YiShengBM =c.RenYuanBM and a.zhuyuanhao=e.zhuyuanhao and (e.medicalcardnumber=? or a.ZhuYuanID=?)";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, id);
+            preparedStatement.setString(2, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
+
+            if (list.size() == 0) {
+                map.put("success", false);
+                map.put("msg", "没有记录");
+                map.put("code", "10002");
+                System.out.println("住院费用明细返回值：" + map);
+                return map;
+            } else {
+                Map<String, Object> map1 = new HashMap<>();
+                map1.put("name", list.get(0).get("name"));
+                map1.put("sex", list.get(0).get("sex"));
+                map1.put("doctor", list.get(0).get("doctor"));
+                map1.put("total", list.get(0).get("total"));
+                map1.put("admissionNumber", list.get(0).get("admissionNumber"));
+                map1.put("diagnosis", list.get(0).get("diagnosis"));
+
+                for (int i = 0; i < list.size(); i++) {
+                    list.get(i).remove("name");
+                    list.get(i).remove("sex");
+                    list.get(i).remove("doctor");
+                    list.get(i).remove("total");
+                    list.get(i).remove("admissionNumber");
+                    list.get(i).remove("diagnosis");
+                }
+
+                map1.put("details", list);
+                map.put("success", true);
+                map.put("msg", "成功");
+                map.put("code", "10001");
+                map.put("data", map1);
+                System.out.println("住院费用明细返回值：" + map);
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success", false);
+            map.put("msg", "未知错误");
+            map.put("code", "10003");
+            return map;
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

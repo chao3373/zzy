@@ -53,4 +53,8 @@ public interface IndexService {
     Map<String, Object> baogaoMain(List<String> stringg);
 
     Map<String, Object> baogaoMingXi(List<String> stringg);
+
+    Map<String, Object> tongji(List<String> stringg);
+
+    Map<String, Object> queryHospitalizationDetail(List<String> stringg);
 }

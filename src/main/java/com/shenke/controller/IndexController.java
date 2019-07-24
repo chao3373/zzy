@@ -324,10 +324,8 @@ public class IndexController {
         list.add("total");
         list.add("charges");
         List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
-        System.out.println("================stringg===============");
-        System.out.println(stringg);
-        String charges = list.get(list.size() - 1);
-        System.out.println("================charges===============");
+        String charges = stringg.get(stringg.size() - 1);
+        System.out.println(charges);
         JSONArray array = JSONUtil.parseArray(charges);
 
         HuanZhe huanZhe = new HuanZhe();
@@ -374,7 +372,7 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/baogaoMain")
-    public Map<String, Object> baogaoMain(HttpServletRequest request){
+    public Map<String, Object> baogaoMain(HttpServletRequest request) {
         List<String> list = new ArrayList<>();
         list.add("medicalCardNumber");
         list.add("startTime");
@@ -390,11 +388,39 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/baogaoMingXi")
-    public Map<String, Object> baogaoMingXi(HttpServletRequest request){
+    public Map<String, Object> baogaoMingXi(HttpServletRequest request) {
         List<String> list = new ArrayList<>();
         list.add("id");
         list.add("type");
         List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
         return indexService.baogaoMingXi(stringg);
     }
+
+    /***
+     * 数据统计
+     * @param request
+     * @return
+     */
+    @RequestMapping("/tongJi")
+    public Map<String, Object> tongji(HttpServletRequest request){
+        List<String> list = new ArrayList<>();
+        list.add("startTime");
+        list.add("endTime");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.tongji(stringg);
+    }
+
+    /***
+     *查询住院费用明细
+     * @param request
+     * @return
+     */
+    @RequestMapping("/queryHospitalizationDetail")
+    public Map<String, Object> queryHospitalizationDetail(HttpServletRequest request){
+        List<String> list = new ArrayList<>();
+        list.add("id");
+        List<String> stringg = GetRequestBodyUtil.getStringg(request, list);
+        return indexService.queryHospitalizationDetail(stringg);
+    }
+
 }
