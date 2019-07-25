@@ -138,9 +138,10 @@ public class IndexServiceImpl implements IndexService {
         Connection connection = DaoUtil.getConnection();
 
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("select b.xingming as name, b.LianXiDH as  phone, b.XingBie as  sex, b.ZhuZhi as address, b.ChuShengNY as  birthdate, c.ShenFenZH as  idCardNo, a.CardNo as medicalCardNumber From Card_MasterInfo a,PA_PatientInfo b,PA_PatientInfoExt c where a.CardNo=b.JiuZhenKH and b.BingLiLH=c.BingLiLH and a.CardNo = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement("select b.xingming as name, b.LianXiDH as  phone, b.XingBie as  sex, b.ZhuZhi as address, b.ChuShengNY as  birthdate, c.ShenFenZH as  idCardNo, a.CardNo as medicalCardNumber From Card_MasterInfo a,PA_PatientInfo b,PA_PatientInfoExt c where a.CardNo=b.JiuZhenKH and b.BingLiLH=c.BingLiLH and (a.CardNo = ? or a.medicalCardNumber = ?)");
 
             preparedStatement.setString(1, medicalCardNumber);
+            preparedStatement.setString(2, medicalCardNumber);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             List<Map<String, Object>> list = DaoUtil.getresultSet(resultSet);
